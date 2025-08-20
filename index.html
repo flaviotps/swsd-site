@@ -6,66 +6,346 @@
   <title>Secret Dungeons</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #f8f8f8;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0a0a0a;
+      background-image: 
+        radial-gradient(circle at 25% 25%, rgba(120, 53, 255, 0.1) 0%, transparent 70%),
+        radial-gradient(circle at 75% 75%, rgba(255, 107, 53, 0.1) 0%, transparent 70%);
+      min-height: 100vh;
       padding: 20px;
+      color: #e5e7eb;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
     }
 
     h1 {
-      text-align: center;
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
     }
 
-    .element-group {
-      margin-bottom: 30px;
+    .stats-card {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #fbbf24;
+    }
+
+    .stats-icon {
+      width: 16px;
+      height: 16px;
+      background: #fbbf24;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .element-section {
+      margin-bottom: 32px;
+    }
+
+    .element-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .element-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #f8fafc;
+    }
+
+    .monster-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+      gap: 20px;
     }
 
     .monster-card {
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      padding: 15px;
-      margin: 10px 0;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .monster-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    }
+
+    .monster-card:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+      box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
     }
 
     .monster-header {
       display: flex;
       align-items: center;
-    }
-
-    .monster-header img {
-      width: 50px;
-      height: 50px;
-      margin-right: 15px;
-    }
-
-    .monster-header h3 {
-      margin: 0;
-    }
-
-    .session {
-      margin-left: 20px;
-      font-size: 14px;
-      color: #555;
-    }
-
-    #counter {
-      text-align: center;
+      gap: 16px;
       margin-bottom: 20px;
-      font-size: 18px;
-      color: #222;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .monster-avatar {
+      position: relative;
+      width: 64px;
+      height: 64px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .monster-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .monster-info h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 4px;
+    }
+
+    .monster-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stars {
+      color: #fbbf24;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .element-badge {
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .DARK { background: linear-gradient(135deg, #4c1d95, #581c87); color: #e5e7eb; }
+    .WATER { background: linear-gradient(135deg, #1e40af, #1e3a8a); color: #dbeafe; }
+    .FIRE { background: linear-gradient(135deg, #dc2626, #b91c1c); color: #fee2e2; }
+    .WIND { background: linear-gradient(135deg, #059669, #047857); color: #d1fae5; }
+    .LIGHT { background: linear-gradient(135deg, #d97706, #b45309); color: #fef3c7; }
+
+    .sessions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .session-item {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 16px;
+      transition: all 0.2s ease;
+    }
+
+    .session-item:hover {
+      background: rgba(0, 0, 0, 0.3);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .session-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .session-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .host-name {
+      font-weight: 600;
+      color: #f8fafc;
+      font-size: 14px;
+    }
+
+    .server-info {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .copy-button {
+      padding: 6px 12px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .copy-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+    }
+
+    .copy-button:active {
+      transform: translateY(0);
+    }
+
+    .progress-section {
+      margin-top: 8px;
+    }
+
+    .time-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+
+    .time-left {
+      font-weight: 600;
+      color: #10b981;
+    }
+
+    .progress-track {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #059669);
+      border-radius: 2px;
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6b7280;
+    }
+
+    .empty-state h3 {
+      font-size: 1.25rem;
+      margin-bottom: 8px;
+      color: #9ca3af;
+    }
+
+    @media (max-width: 768px) {
+      .monster-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .container {
+        padding: 0 10px;
+      }
     }
   </style>
 </head>
 
 <body>
-  <h1>Secret Dungeons</h1>
-
-  <!-- Page View Counter -->
-  <div id="counter">Loading page views...</div>
-
-  <div id="dungeon-list"></div>
+  <div class="container">
+    <div class="header">
+      <h1>Secret Dungeons</h1>
+      <div class="stats-card">
+        <div class="stats-icon"></div>
+        <span id="counter">Loading...</span>
+      </div>
+    </div>
+    <div id="dungeon-list"></div>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
@@ -84,72 +364,196 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-
     const dungeonList = document.getElementById("dungeon-list");
     const counterDisplay = document.getElementById("counter");
 
-    // --- Page view counter ---
+    // Page view counter
     const counterRef = ref(db, "pageViews");
-    runTransaction(counterRef, (current) => {
-      return (current || 0) + 1;
-    });
-
-    onValue(counterRef, (snapshot) => {
+    runTransaction(counterRef, (current) => (current || 0) + 1);
+    onValue(counterRef, snapshot => {
       const count = snapshot.val() || 0;
-      counterDisplay.innerHTML = `Page Views: ${count}`;
+      counterDisplay.innerHTML = `${count.toLocaleString()} page views`;
     });
 
-    // Listen for changes in /Prod/sd
+    // Format remaining time
+    function formatTimeLeft(endTime) {
+      let diff = Math.floor((endTime - Date.now()) / 1000);
+      if (diff < 0) diff = 0;
+      const h = Math.floor(diff / 3600);
+      const m = Math.floor((diff % 3600) / 60);
+      const s = diff % 60;
+      return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    // Copy to clipboard with feedback
+    async function copyToClipboard(text, button) {
+      try {
+        await navigator.clipboard.writeText(text);
+        const originalText = button.innerHTML;
+        button.innerHTML = '✓ Copied!';
+        button.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+        setTimeout(() => {
+          button.innerHTML = originalText;
+          button.style.background = 'linear-gradient(135deg, #4f46e5, #7c3aed)';
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy:', err);
+      }
+    }
+
+    // Listen to dungeon data
     const sdRef = ref(db, "Prod/sd");
-    onValue(sdRef, (snapshot) => {
+    onValue(sdRef, snapshot => {
       const data = snapshot.val();
       dungeonList.innerHTML = "";
-
+      
       if (!data) {
-        dungeonList.innerHTML = "<p>No dungeons available.</p>";
+        dungeonList.innerHTML = `
+          <div class="empty-state">
+            <h3>No dungeons available</h3>
+            <p>Check back later for active secret dungeons!</p>
+          </div>
+        `;
         return;
       }
 
       Object.keys(data).forEach(element => {
-        const elementGroup = document.createElement("div");
-        elementGroup.className = "element-group";
-        elementGroup.innerHTML = `<h2>${element}</h2>`;
+        const elementSection = document.createElement("div");
+        elementSection.className = "element-section";
+        
+        const elementHeader = document.createElement("div");
+        elementHeader.className = "element-header";
+        elementHeader.innerHTML = `
+          <div class="element-title">${element}</div>
+        `;
+        
+        const monsterGrid = document.createElement("div");
+        monsterGrid.className = "monster-grid";
 
         const monsters = data[element];
         Object.keys(monsters).forEach(monsterName => {
-          const monsterGroup = document.createElement("div");
-          monsterGroup.className = "monster-card";
+          const monsterCard = document.createElement("div");
+          monsterCard.className = "monster-card";
 
           const sessions = monsters[monsterName];
-          const sample = Object.values(sessions)[0]; // take first for monster info
+          const sample = Object.values(sessions)[0];
 
-          monsterGroup.innerHTML = `
+          monsterCard.innerHTML = `
             <div class="monster-header">
-              <img src="images/${sample.monster.image}.png" alt="${monsterName}">
-              <h3>${sample.monster.genericName} (${sample.monster.stars}★)</h3>
+              <div class="monster-avatar">
+                <img src="img/${sample.monster.image}.webp" 
+                     alt="${monsterName}" 
+                     onerror="this.style.background='linear-gradient(135deg, #ef4444, #dc2626)'; this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"white\"><path d=\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z\"/></svg>';">
+              </div>
+              <div class="monster-info">
+                <h3>${sample.monster.genericName}</h3>
+                <div class="monster-meta">
+                  <span class="stars">${'★'.repeat(sample.monster.stars)}</span>
+                  <span class="element-badge ${sample.monster.element}">${sample.monster.element}</span>
+                </div>
+              </div>
             </div>
+            <div class="sessions-list"></div>
           `;
 
+          const sessionsList = monsterCard.querySelector('.sessions-list');
+          let hasActiveSessions = false;
+          
           Object.values(sessions).forEach(session => {
-            const sessionDiv = document.createElement("div");
-            const start = new Date(session.creationTime).toLocaleTimeString();
-            const end = new Date(session.endTime).toLocaleTimeString();
-            sessionDiv.className = "session";
-            sessionDiv.innerHTML = `
-              Host: <b>${session.inGameName}</b> | 
-              Server: ${session.serverLocation} | 
-              ${start} → ${end}
+            // Skip already expired sessions
+            if (session.endTime <= Date.now()) {
+              return;
+            }
+
+            hasActiveSessions = true;
+            const sessionItem = document.createElement("div");
+            sessionItem.className = "session-item";
+
+            sessionItem.innerHTML = `
+              <div class="session-header">
+                <div class="session-info">
+                  <div class="host-name">${session.inGameName}</div>
+                  <div class="server-info">Server: ${session.serverLocation}</div>
+                </div>
+                <button class="copy-button" onclick="copyToClipboard('${session.inGameName}', this)">
+                  📋 Copy Host
+                </button>
+              </div>
+              <div class="progress-section">
+                <div class="time-info">
+                  <span>Time remaining:</span>
+                  <span class="time-left">--:--:--</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-fill" style="width: 100%"></div>
+                </div>
+              </div>
             `;
-            monsterGroup.appendChild(sessionDiv);
+
+            const timeLeft = sessionItem.querySelector('.time-left');
+            const progressFill = sessionItem.querySelector('.progress-fill');
+
+            function updateSession() {
+              const now = Date.now();
+              const total = session.endTime - session.creationTime;
+              const remaining = session.endTime - now;
+              
+              // Hide expired sessions
+              if (remaining <= 0) {
+                sessionItem.style.display = 'none';
+                clearInterval(interval);
+                
+                // Check if all sessions in this monster are expired
+                const visibleSessions = sessionsList.querySelectorAll('.session-item:not([style*="display: none"])');
+                if (visibleSessions.length === 0) {
+                  monsterCard.style.display = 'none';
+                  
+                  // Check if all monsters in this element are hidden
+                  const visibleMonsters = monsterGrid.querySelectorAll('.monster-card:not([style*="display: none"])');
+                  if (visibleMonsters.length === 0) {
+                    elementSection.style.display = 'none';
+                  }
+                }
+                return;
+              }
+              
+              const percentage = Math.max(0, (remaining / total) * 100);
+              
+              progressFill.style.width = percentage + "%";
+              timeLeft.textContent = formatTimeLeft(session.endTime);
+              
+              if (percentage < 20) {
+                progressFill.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+                timeLeft.style.color = '#ef4444';
+              } else if (percentage < 50) {
+                progressFill.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+                timeLeft.style.color = '#f59e0b';
+              }
+            }
+
+            updateSession();
+            const interval = setInterval(updateSession, 1000);
+
+            sessionsList.appendChild(sessionItem);
           });
 
-          elementGroup.appendChild(monsterGroup);
+          // Only add monster card if it has active sessions
+          if (hasActiveSessions) {
+            monsterGrid.appendChild(monsterCard);
+          }
         });
 
-        dungeonList.appendChild(elementGroup);
+        // Only add element section if it has monsters with active sessions
+        if (monsterGrid.children.length > 0) {
+          elementSection.appendChild(elementHeader);
+          elementSection.appendChild(monsterGrid);
+          dungeonList.appendChild(elementSection);
+        }
       });
     });
+
+    // Make copyToClipboard globally available
+    window.copyToClipboard = copyToClipboard;
   </script>
 </body>
-
 </html>
