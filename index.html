@@ -17,7 +17,7 @@
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: #0a0a0a;
-      background-image: 
+      background-image:
         radial-gradient(circle at 25% 25%, rgba(120, 53, 255, 0.1) 0%, transparent 70%),
         radial-gradient(circle at 75% 75%, rgba(255, 107, 53, 0.1) 0%, transparent 70%);
       min-height: 100vh;
@@ -70,8 +70,15 @@
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.7;
+      }
     }
 
     .element-section {
@@ -126,14 +133,14 @@
       transform: translateY(-2px);
       background: rgba(255, 255, 255, 0.06);
       border-color: rgba(255, 255, 255, 0.15);
-      box-shadow: 
+      box-shadow:
         0 20px 40px rgba(0, 0, 0, 0.4),
         0 0 0 1px rgba(255, 255, 255, 0.05);
     }
 
     .monster-header {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 16px;
       margin-bottom: 20px;
       padding-bottom: 16px;
@@ -148,6 +155,7 @@
       overflow: hidden;
       background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
       border: 2px solid rgba(255, 255, 255, 0.1);
+      flex-shrink: 0;
     }
 
     .monster-avatar img {
@@ -156,26 +164,22 @@
       object-fit: cover;
     }
 
+    .monster-info {
+      flex: 1;
+      min-width: 0;
+    }
+
     .monster-info h3 {
       font-size: 1.1rem;
       font-weight: 600;
       color: #f8fafc;
-      margin-bottom: 4px;
-    }
-
-    .monster-meta {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .stars {
-      color: #fbbf24;
-      font-size: 14px;
-      font-weight: 500;
+      margin-bottom: 8px;
     }
 
     .element-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
       padding: 4px 8px;
       border-radius: 6px;
       font-size: 11px;
@@ -184,11 +188,38 @@
       letter-spacing: 0.5px;
     }
 
-    .DARK { background: linear-gradient(135deg, #3a1a5c, #2d1445); color: #e5d9ff; }
-    .WATER { background: linear-gradient(135deg, #4a8cc7, #2e5f8a); color: #d4e7f7; }
-    .FIRE { background: linear-gradient(135deg, #c44444, #8b2f2f); color: #ffd6d6; }
-    .WIND { background: linear-gradient(135deg, #F5D673, #C7A11C); color: #2c2416; }
-    .LIGHT { background: linear-gradient(135deg, #C3B7A0, #FBECD8); color: #3d3427; }
+    .stars {
+      color: #fbbf24;
+      font-size: 16px;
+      font-weight: 500;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .DARK {
+      background: linear-gradient(135deg, #3a1a5c, #2d1445);
+      color: #e5d9ff;
+    }
+
+    .WATER {
+      background: linear-gradient(135deg, #4a8cc7, #2e5f8a);
+      color: #d4e7f7;
+    }
+
+    .FIRE {
+      background: linear-gradient(135deg, #c44444, #8b2f2f);
+      color: #ffd6d6;
+    }
+
+    .WIND {
+      background: linear-gradient(135deg, #F5D673, #C7A11C);
+      color: #2c2416;
+    }
+
+    .LIGHT {
+      background: linear-gradient(135deg, #C3B7A0, #FBECD8);
+      color: #3d3427;
+    }
 
     .sessions-list {
       display: flex;
@@ -303,8 +334,13 @@
     }
 
     @keyframes shimmer {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(100%); }
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
     }
 
     .empty-state {
@@ -323,11 +359,11 @@
       .monster-grid {
         grid-template-columns: 1fr;
       }
-      
+
       h1 {
         font-size: 2rem;
       }
-      
+
       .container {
         padding: 0 10px;
       }
@@ -406,7 +442,7 @@
     onValue(sdRef, snapshot => {
       const data = snapshot.val();
       dungeonList.innerHTML = "";
-      
+
       if (!data) {
         dungeonList.innerHTML = `
           <div class="empty-state">
@@ -420,13 +456,13 @@
       Object.keys(data).forEach(element => {
         const elementSection = document.createElement("div");
         elementSection.className = "element-section";
-        
+
         const elementHeader = document.createElement("div");
         elementHeader.className = "element-header";
         elementHeader.innerHTML = `
           <div class="element-title">${element}</div>
         `;
-        
+
         const monsterGrid = document.createElement("div");
         monsterGrid.className = "monster-grid";
 
@@ -447,18 +483,21 @@
               </div>
               <div class="monster-info">
                 <h3>${sample.monster.genericName}</h3>
-                <div class="monster-meta">
-                  <span class="stars">${'★'.repeat(sample.monster.stars)}</span>
-                  <span class="element-badge ${sample.monster.element}">${sample.monster.element}</span>
+                <div class="element-badge ${sample.monster.element}">
+                  <img src="img/${sample.monster.element}.webp" 
+                       alt="${sample.monster.element}" 
+                       style="width:16px; height:16px;">
+                  ${sample.monster.element}
                 </div>
               </div>
+              <div class="stars">${'★'.repeat(sample.monster.stars)}</div>
             </div>
             <div class="sessions-list"></div>
           `;
 
           const sessionsList = monsterCard.querySelector('.sessions-list');
           let hasActiveSessions = false;
-          
+
           Object.values(sessions).forEach(session => {
             // Skip already expired sessions
             if (session.endTime <= Date.now()) {
@@ -497,17 +536,17 @@
               const now = Date.now();
               const total = session.endTime - session.creationTime;
               const remaining = session.endTime - now;
-              
+
               // Hide expired sessions
               if (remaining <= 0) {
                 sessionItem.style.display = 'none';
                 clearInterval(interval);
-                
+
                 // Check if all sessions in this monster are expired
                 const visibleSessions = sessionsList.querySelectorAll('.session-item:not([style*="display: none"])');
                 if (visibleSessions.length === 0) {
                   monsterCard.style.display = 'none';
-                  
+
                   // Check if all monsters in this element are hidden
                   const visibleMonsters = monsterGrid.querySelectorAll('.monster-card:not([style*="display: none"])');
                   if (visibleMonsters.length === 0) {
@@ -516,12 +555,12 @@
                 }
                 return;
               }
-              
+
               const percentage = Math.max(0, (remaining / total) * 100);
-              
+
               progressFill.style.width = percentage + "%";
               timeLeft.textContent = formatTimeLeft(session.endTime);
-              
+
               if (percentage < 20) {
                 progressFill.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
                 timeLeft.style.color = '#ef4444';
@@ -556,4 +595,5 @@
     window.copyToClipboard = copyToClipboard;
   </script>
 </body>
+
 </html>
