@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Secret Dungeons</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f8f8;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .element-group {
+      margin-bottom: 30px;
+    }
+
+    .monster-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+      margin: 10px 0;
+    }
+
+    .monster-header {
+      display: flex;
+      align-items: center;
+    }
+
+    .monster-header img {
+      width: 50px;
+      height: 50px;
+      margin-right: 15px;
+    }
+
+    .monster-header h3 {
+      margin: 0;
+    }
+
+    .session {
+      margin-left: 20px;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Secret Dungeons</h1>
+  <div id="dungeon-list"></div>
+
+  <script type="module">
+    // 🔥 Replace with your Firebase config
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDeyhLjjTW67mLtJLnit0_zj1rgH16POL4",
+      authDomain: "sw-scanner.firebaseapp.com",
+      databaseURL: "https://sw-scanner-default-rtdb.firebaseio.com",
+      projectId: "sw-scanner",
+      storageBucket: "sw-scanner.firebasestorage.app",
+      messagingSenderId: "671743091397",
+      appId: "1:671743091397:web:4863a19c3b1e5e205786ac",
+      measurementId: "G-3X5HT62NKN"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const dungeonList = document.getElementById("dungeon-list");
+
+    // Listen for changes in /Prod/sd
+    const sdRef = ref(db, "Prod/sd");
+    onValue(sdRef, (snapshot) => {
+      const data = snapshot.val();
+      dungeonList.innerHTML = "";
+
+      if (!data) {
+        dungeonList.innerHTML = "<p>No dungeons available.</p>";
+        return;
+      }
+
+      Object.keys(data).forEach(element => {
+        const elementGroup = document.createElement("div");
+        elementGroup.className = "element-group";
+        elementGroup.innerHTML = `<h2>${element}</h2>`;
+
+        const monsters = data[element];
+        Object.keys(monsters).forEach(monsterName => {
+          const monsterGroup = document.createElement("div");
+          monsterGroup.className = "monster-card";
+
+          const sessions = monsters[monsterName];
+          const sample = Object.values(sessions)[0]; // take first for monster info
+
+          monsterGroup.innerHTML = `
+            <div class="monster-header">
+              <img src="images/${sample.monster.image}.png" alt="${monsterName}">
+              <h3>${sample.monster.genericName} (${sample.monster.stars}★)</h3>
+            </div>
+          `;
+
+          Object.values(sessions).forEach(session => {
+            const sessionDiv = document.createElement("div");
+            const start = new Date(session.creationTime).toLocaleTimeString();
+            const end = new Date(session.endTime).toLocaleTimeString();
+            sessionDiv.className = "session";
+            sessionDiv.innerHTML = `
+              Host: <b>${session.inGameName}</b> | 
+              Server: ${session.serverLocation} | 
+              ${start} → ${end}
+            `;
+            monsterGroup.appendChild(sessionDiv);
+          });
+
+          elementGroup.appendChild(monsterGroup);
+        });
+
+        dungeonList.appendChild(elementGroup);
+      });
+    });
+  </script>
+</body>
+
+</html>
