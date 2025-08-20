@@ -49,17 +49,27 @@
       font-size: 14px;
       color: #555;
     }
+
+    #counter {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 18px;
+      color: #222;
+    }
   </style>
 </head>
 
 <body>
   <h1>Secret Dungeons</h1>
+
+  <!-- Page View Counter -->
+  <div id="counter">Loading page views...</div>
+
   <div id="dungeon-list"></div>
 
   <script type="module">
-    // 🔥 Replace with your Firebase config
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+    import { getDatabase, ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDeyhLjjTW67mLtJLnit0_zj1rgH16POL4",
@@ -76,6 +86,18 @@
     const db = getDatabase(app);
 
     const dungeonList = document.getElementById("dungeon-list");
+    const counterDisplay = document.getElementById("counter");
+
+    // --- Page view counter ---
+    const counterRef = ref(db, "pageViews");
+    runTransaction(counterRef, (current) => {
+      return (current || 0) + 1;
+    });
+
+    onValue(counterRef, (snapshot) => {
+      const count = snapshot.val() || 0;
+      counterDisplay.innerHTML = `Page Views: ${count}`;
+    });
 
     // Listen for changes in /Prod/sd
     const sdRef = ref(db, "Prod/sd");
